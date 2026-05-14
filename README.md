@@ -1,134 +1,63 @@
 # JobMatch AI
 
-Score and optimize your resume against any job posting — in one click, directly in your browser.
+I'm a third-year Informatics student at the University of Washington 
+studying Data Science, and I built this while teaching myself Python 
+to make my own job search less painful.
+
+The idea came from a real frustration. I was spending hours on LinkedIn 
+going through internships one by one, had no idea which ones were actually 
+worth applying to, and kept rewriting my resume from scratch for every role. 
+I figured if I was learning to code anyway, I might as well build something 
+that actually solves the problem.
+
+## What it does
+
+JobMatch AI is a Chrome extension that lives in your browser while you job 
+hunt. You open any job posting on LinkedIn, Handshake, Indeed, or Greenhouse, 
+click the extension icon, and within a few seconds you get:
+
+- A match score from 0 to 100 based on how well your resume fits that specific role
+- The exact keywords you're missing that ATS systems flag during screening
+- Rewrites of your actual bullet points tailored to the job — using your real experience, just reframed to land better
+- One piece of honest recruiter advice on what would move the needle most
+
+The AI is designed to think like a recruiter who specializes in Data Analytics, 
+Sports Analytics, and Product Management internships. It never makes up 
+experience you don't have — it just helps you present what's already there 
+in a smarter way.
 
 ## How it works
 
-1. You browse to a job posting on LinkedIn, Handshake, Indeed, Greenhouse, or Lever
-2. Click the **JobMatch AI** extension icon
-3. The extension extracts the job description text from the page
-4. Sends it to a local FastAPI server running on your machine
-5. The server calls Claude with your baked-in resume and the job description
-6. Claude returns a structured analysis: match score, missing keywords, rewritten bullets, and recruiter advice
-7. Results appear in the popup
+There are two parts running together.
 
----
+A small FastAPI server runs locally on your machine in the background. When 
+you click Analyze on a job posting, the Chrome extension reads the job 
+description directly off the page and sends it to that local server. The 
+server calls Claude — Anthropic's AI model — with your resume already loaded 
+as context. Claude analyzes the overlap between your background and the job 
+requirements, then returns a structured breakdown: the match score, what's 
+missing, rewritten versions of your bullet points, and one concrete piece 
+of advice.
 
-## Setup
+Everything happens on your machine. Nothing gets stored anywhere, no data 
+goes to any third party except the Claude API call itself.
 
-### Step 1 — Add your Anthropic API key
+## What I learned building this
 
-Open `jobmatch_api/.env` and replace the placeholder:
+This was my first time building a Chrome extension and my first time writing 
+a REST API from scratch. Getting the extension to communicate with the local 
+server without CORS errors took way longer than I expected. Extracting job 
+text reliably was also tricky — LinkedIn, Handshake, and Indeed all structure 
+their HTML differently so I had to handle each site separately.
 
-```
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-```
+The hardest part was the prompt engineering. Getting Claude to rewrite bullet 
+points without inventing experience required a lot of iteration. The final 
+system prompt instructs it to only reframe what's already in the resume, 
+never fabricate, and focus specifically on ATS keyword matching rather than 
+just making things sound fancier.
 
-Get a key at https://console.anthropic.com/
+## Stack
 
----
-
-### Step 2 — Generate the extension icon
-
-```bash
-cd "jobmatch_extension"
-python make_icon.py
-```
-
-This creates `icon.png`. Only needs to be run once.
-
----
-
-### Step 3 — Install API dependencies and start the server
-
-```bash
-cd "jobmatch_api"
-pip install -r requirements.txt
-uvicorn server:app --reload --port 8000
-```
-
-You should see:
-```
-INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-```
-
-Leave this terminal open while using the extension.
-
----
-
-### Step 4 — Load the Chrome extension
-
-1. Open Chrome and go to `chrome://extensions`
-2. Enable **Developer mode** (toggle in the top-right corner)
-3. Click **Load unpacked**
-4. Select the `jobmatch_extension` folder
-5. Pin the extension to your toolbar (puzzle piece icon → pin)
-
----
-
-### Step 5 — Use it
-
-1. Go to any job posting (LinkedIn, Handshake, Indeed, Greenhouse, or Lever)
-2. Click the **JobMatch AI** icon in your toolbar
-3. Click **Analyze This Job**
-4. Wait ~5–10 seconds for Claude to respond
-5. Review your match score, missing keywords, rewritten bullets, and advice
-
----
-
-## Project structure
-
-```
-jobmatch_api/
-├── server.py        FastAPI server — calls Claude, returns JSON analysis
-├── resume.txt       Mahan's resume (baked in, read at server startup)
-├── .env             ANTHROPIC_API_KEY goes here
-└── requirements.txt
-
-jobmatch_extension/
-├── manifest.json    Chrome Extension Manifest V3
-├── popup.html       Extension UI — dark theme, Linear-inspired
-├── popup.js         UI logic — extracts job text, calls API, renders results
-├── content.js       Content script injected on known job sites
-├── make_icon.py     One-time icon generator (stdlib only, no Pillow needed)
-└── icon.png         Generated by make_icon.py
-```
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| "Cannot reach the local API server" | Run `uvicorn server:app --reload --port 8000` in the `jobmatch_api` folder |
-| "Invalid ANTHROPIC_API_KEY" | Check that your key is correct in `jobmatch_api/.env` |
-| "No job description found" | You may be on a search results page, not the actual job posting. Click into the job and try again. |
-| Extension not showing up | Make sure Developer Mode is on in `chrome://extensions` and the folder loaded without errors |
-| Score seems off | Claude analyzes the text you paste — make sure the full job description loaded on the page before clicking Analyze |
-
----
-
-## API reference
-
-**`GET /health`** — returns `{"status": "ok"}` if the server is running
-
-**`POST /analyze`**
-```json
-// Request
-{ "job_description": "We are looking for a data analyst intern..." }
-
-// Response
-{
-  "match_score": 82,
-  "verdict": "Strong Match",
-  "missing_keywords": ["product roadmap", "JIRA", "stakeholder management"],
-  "rewritten_bullets": [
-    {
-      "original": "Ran usability tests with 15 students...",
-      "rewritten": "Led end-to-end usability testing with 15 users...",
-      "reason": "Added 'product roadmap' keyword and stronger impact framing"
-    }
-  ],
-  "top_advice": "Add a mention of stakeholder communication..."
-}
-```
+- Python + FastAPI + Uvicorn
+- Claude by Anthropic
+- Vanilla JavaScript Chrome Extension (Manifest V3)
