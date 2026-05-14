@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    :root {
+      --bg:           #0a0a0a;
+      --surface:      #111111;
+      --surface2:     #161616;
+      --border:       #1e1e1e;
+      --border2:      #2a2a2a;
+      --text:         #e2e2e2;
+      --text-muted:   #777777;
+      --text-faint:   #3d3d3d;
+      --accent:       #6366f1;
+      --accent-hover: #4f46e5;
+      --green:        #22c55e;
+      --yellow:       #eab308;
+      --red:          #ef4444;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .hidden { display: none !important; }
+
+    /* ── Persistent header ── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+    }
+    .logo-icon {
+      width: 30px; height: 30px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; color: #fff;
+      flex-shrink: 0;
+      letter-spacing: -0.03em;
+    }
+    .logo-copy h1 {
+      font-size: 14px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2;
+    }
+    .logo-copy p {
+      font-size: 11px; color: var(--text-muted); margin-top: 1px;
+    }
+
+    /* ── Shared button styles ── */
+    .btn-primary {
+      width: 100%;
+      padding: 11px 0;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      transition: background 0.12s;
+    }
+    .btn-primary:hover  { background: var(--accent-hover); }
+    .btn-primary:active { background: #4338ca; }
+
+    .btn-ghost {
+      padding: 7px 14px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .btn-ghost:hover { background: var(--surface); color: var(--text); }
+
+    /* ── Initial view ── */
+    #view-initial { padding: 20px 18px; }
+    .intro-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    /* ── Loading view ── */
+    #view-loading {
+      padding: 52px 18px;
+      text-align: center;
+    }
+    .spinner {
+      width: 30px; height: 30px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-label { font-size: 13px; color: var(--text-muted); }
+
+    /* ── Error view ── */
+    #view-error {
+      padding: 32px 18px;
+      text-align: center;
+    }
+    .error-icon { font-size: 26px; margin-bottom: 12px; }
+    #error-message {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 14px;
+      white-space: pre-wrap;
+    }
+    .cmd-hint {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 10px 13px;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: left;
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    /* ── Results view ── */
+    #view-results { padding-bottom: 8px; }
+
+    /* Score strip */
+    .score-strip {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .score-ring-wrap {
+      position: relative;
+      width: 68px; height: 68px;
+      flex-shrink: 0;
+    }
+    .score-ring-wrap svg { transform: rotate(-90deg); }
+    .ring-track { stroke: var(--border2); }
+    .ring-fill  { stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+    .score-overlay {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px; font-weight: 700; letter-spacing: -0.04em;
+    }
+    .score-meta { flex: 1; }
+    .verdict-line {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+    .verdict-sub { font-size: 11px; color: var(--text-muted); }
+
+    .c-green  { color: var(--green); }
+    .c-yellow { color: var(--yellow); }
+    .c-red    { color: var(--red); }
+    .s-green  { stroke: var(--green); }
+    .s-yellow { stroke: var(--yellow); }
+    .s-red    { stroke: var(--red); }
+
+    /* Sections */
+    .section {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+      margin-bottom: 10px;
+    }
+
+    /* Keyword chips */
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 3px 9px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #f87171;
+    }
+    .chip-none { font-size: 13px; color: var(--text-muted); }
+
+    /* Bullet cards */
+    .bullet-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      padding: 11px 13px;
+      margin-bottom: 8px;
+    }
+    .bullet-card:last-child { margin-bottom: 0; }
+    .b-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+      margin-bottom: 4px;
+    }
+    .b-text {
+      font-size: 12.5px;
+      line-height: 1.55;
+    }
+    .b-original { color: var(--text-muted); }
+    .b-divider { height: 1px; background: var(--border); margin: 9px 0; }
+    .b-rewritten { color: var(--text); }
+    .b-footer {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .b-reason { font-size: 11px; color: var(--text-faint); line-height: 1.45; flex: 1; }
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 4px 9px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.12s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover { background: var(--surface2); color: var(--text); border-color: #383838; }
+    .copy-btn.copied { color: var(--green); border-color: rgba(34,197,94,0.3); }
+
+    /* Advice */
+    .advice-box {
+      background: rgba(99,102,241,0.06);
+      border: 1px solid rgba(99,102,241,0.18);
+      border-radius: 8px;
+      padding: 11px 13px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--text);
+    }
+
+    /* Footer */
+    .results-footer {
+      padding: 12px 18px 6px;
+      display: flex;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+  <!-- Persistent header -->
+  <header class="app-header">
+    <div class="logo-icon">J</div>
+    <div class="logo-copy">
+      <h1>JobMatch AI</h1>
+      <p id="header-sub">Powered by Claude</p>
+    </div>
+  </header>
+
+  <!-- ── Initial view ── -->
+  <div id="view-initial">
+    <p class="intro-text">
+      Navigate to any job posting on LinkedIn, Handshake, Indeed, Greenhouse,
+      or Lever — then click below to score your resume against it.
+    </p>
+    <button class="btn-primary" id="analyzeBtn">Analyze This Job</button>
+  </div>
+
+  <!-- ── Loading view ── -->
+  <div id="view-loading" class="hidden">
+    <div class="spinner"></div>
+    <p class="loading-label">Analyzing with Claude AI…</p>
+  </div>
+
+  <!-- ── Error view ── -->
+  <div id="view-error" class="hidden">
+    <div class="error-icon">⚠️</div>
+    <p id="error-message"></p>
+    <div id="cmd-hint" class="cmd-hint hidden">
+      cd jobmatch_api<br>
+      uvicorn server:app --reload --port 8000
+    </div>
+    <button class="btn-ghost" id="retryBtn" style="width:100%">← Go Back</button>
+  </div>
+
+  <!-- ── Results view ── -->
+  <div id="view-results" class="hidden">
+
+    <div class="score-strip">
+      <div class="score-ring-wrap">
+        <svg width="68" height="68" viewBox="0 0 68 68">
+          <circle class="ring-track" cx="34" cy="34" r="28"
+            fill="none" stroke-width="5"/>
+          <circle id="scoreArc" class="ring-fill" cx="34" cy="34" r="28"
+            fill="none" stroke-width="5"
+            stroke-dasharray="175.93"
+            stroke-dashoffset="175.93"/>
+        </svg>
+        <div class="score-overlay" id="scoreNumber">—</div>
+      </div>
+      <div class="score-meta">
+        <div class="verdict-line" id="verdictLine">—</div>
+        <div class="verdict-sub">Resume match score</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Missing Keywords</div>
+      <div class="chips" id="chipsContainer"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Optimized Bullets</div>
+      <div id="bulletsContainer"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Recruiter Advice</div>
+      <div class="advice-box" id="adviceBox"></div>
+    </div>
+
+    <div class="results-footer">
+      <button class="btn-ghost" id="resetBtn">← Analyze Another</button>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

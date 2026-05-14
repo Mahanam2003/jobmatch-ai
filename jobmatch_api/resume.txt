@@ -1,0 +1,29 @@
+Mahan Amiri
+Seattle, WA | 425-435-5377 | mamiri2@uw.edu | github.com/Mahanam2003
+Target roles: Sports Data Analyst Intern, Data Analyst Intern, Product Manager Intern
+
+WORK EXPERIENCE
+UX Research Assistant | University of Washington | Jan 2025 – Present
+- Ran usability tests with 15 students on the UW registration site, mapped full user journey, flagged 42% drop-off in onboarding flow
+- Built 3 Figma prototypes, ran A/B tests, winning version reduced drop-off from 42% to 27%, included in Q2 roadmap
+- Wrote feature proposal with prototype and supporting data, presented to faculty
+
+Research Assistant | UW Foster School of Business | Jan 2025 – Present
+- Built coding rubric for multicultural teams study (259 participants, 64 teams), reduced coding disagreements by 40%
+- Cut average review time per transcript from 25 to 15 minutes
+- Caught 30+ miscoded transcripts mid-study, redesigned process, kept project on schedule
+
+Social Media and Analytics Manager | Thruline Coffee Roasters | Jun 2023 – Dec 2025
+- Tracked weekly sales and social engagement for cafe doing 2,800+ coffees/week
+- Found behind-the-scenes content got 3.1x more saves than product posts, reworked content strategy
+- Grew Instagram engagement from 1.2% to 3.8% over 8 months
+
+PROJECTS
+Serie A Predictive Analytics Model (R)
+- Built model to predict Serie A team points, reduced MAE from 3.54 to 2.58 across 5 versions
+- Validated on 2 unseen seasons, held up with MAE of 2.66, outperformed Understat expected points metric
+
+SKILLS
+Product & Research: User Research, Usability Testing, A/B Testing, Figma, Journey Mapping, Feature Scoping
+Data & Analytics: Python, R, SQL, Google Analytics, Excel, Statistical Modeling, C++, Java, JavaScript
+Education: B.S. Informatics Data Science Track, University of Washington (GPA 3.7, Dean's List)
