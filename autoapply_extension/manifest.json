@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "AutoApply",
+  "version": "1.0",
+  "description": "Automatically fills job application forms from your saved profile.",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "permissions": ["activeTab", "scripting"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "profile.js",
+        "fillers/generic.js",
+        "fillers/tiktok.js",
+        "fillers/linkedin.js",
+        "fillers/handshake.js",
+        "fillers/indeed.js",
+        "fillers/greenhouse.js",
+        "fillers/lever.js",
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}
